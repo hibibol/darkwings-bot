@@ -1,0 +1,5 @@
+discord.py == 1.2.5
+beautifulsoup4
+oauth2client
+gspread
+pandas
