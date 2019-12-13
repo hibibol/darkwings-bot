@@ -171,12 +171,18 @@ async def on_message(message):
         argument_list.pop(-1)
 
     if message.content.startswith("/battle") or message.content.startswith(".battle"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
     
         if len(argument_list) == 1:        
-            
 
             output_channel = guild.get_channel(manage_dict[channel_id_str]["output_channel"])
+
+            #邪魔なので履歴を消去する
+            async for old_message in output_channel.history(limit = 200):
+                if old_message.author.id == minerva_id:
+                    await old_message.delete()
+                                
+
             manage_dict[channel_id_str]["boss_supress_number"] = 0
 
             #dictの初期化
@@ -200,6 +206,12 @@ async def on_message(message):
 
 
             output_channel = guild.get_channel(manage_dict[channel_id_str]["output_channel"])
+
+            #邪魔なので履歴を消去する
+            async for old_message in output_channel.history(limit = 200):
+                if old_message.author.id == minerva_id:
+                    await old_message.delete()
+
             manage_dict[channel_id_str]["boss_supress_number"] = (int(argument_list[1])-1)*5 + int(argument_list[2])-1
 
             #dictの初期化
@@ -220,7 +232,8 @@ async def on_message(message):
             await message.add_reaction(ok_hand)           
 
     if message.content.startswith("/reserve") or message.content.startswith(".reserve") or message.content.startswith("/rsv") or message.content.startswith(".rsv"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
+    
         if len(argument_list) == 3:
             if argument_list[1].isdecimal and argument_list[2].isdecimal:
 
@@ -284,7 +297,7 @@ async def on_message(message):
 
 
     if message.content.startswith("/cancel") or message.content.startswith(".cancel"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
         if len(argument_list) == 1 :
             return 
         if argument_list[1].isdecimal:     
@@ -326,7 +339,7 @@ async def on_message(message):
 
 
     if message.content.startswith("/totsu") or message.content.startswith(".totsu"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
 
         boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
     
@@ -401,7 +414,7 @@ async def on_message(message):
 
 
     if message.content.startswith("/fin") or message.content.startswith(".fin"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
 
         if len(argument_list)==2 :
             argument_list[1] = argument_list[1].replace(",","")
@@ -482,7 +495,7 @@ async def on_message(message):
 
     #LA時用のコマンド
     if message.content.startswith("/la") or message.content.startswith(".la"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
         with open(json_file,"r") as f:
             manage_dict = json.load(f)       
         totsu_list = manage_dict[channel_id_str]["reserve"]["totsu"].split("\t")
@@ -563,7 +576,7 @@ async def on_message(message):
 
     #残HPを調整する用のコマンド
     if message.content.startswith("/adjust") or message.content.startswith(".adjust"):
-        print(datetime.now(JST),message.content)
+        print(datetime.now(JST),author_display_name,message.content)
 
         if len(argument_list)==2 :
             argument_list[1] = argument_list[1].replace(",","")
@@ -755,7 +768,7 @@ async def on_raw_reaction_remove(payload):
 async def loop():
     # 現在の時刻
     now = datetime.now(JST).strftime('%H:%M')
-    if now == '25:00': #クラバト期間中は朝5時に出すように書き換える
+    if now == '05:00': #クラバト期間中は朝5時に出すように書き換える
         guild = client.get_guild(guild_id)
         global manage_dict
         #デフォルトで絵文字をリアクションに付けておく

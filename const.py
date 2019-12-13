@@ -6,6 +6,7 @@ schedule_channel_id = 598833688402198528
 #カリンさんを動かすのに必要
 zatsudan_channel_id = 582956584624324618
 
+minerva_id = 634687198842716160
 
 
 clan_dicts = [{"role_id":582952905653485568,
