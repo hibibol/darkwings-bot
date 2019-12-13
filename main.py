@@ -21,6 +21,13 @@ client = discord.Client()
 
 JST = timezone(timedelta(hours=+9), 'JST')
 
+with open(json_file,"r") as f:
+    manage_dict = json.load(f)
+
+with open("config.json","r") as f:
+    TOKEN = json.load(f)["DISCORD_TOKEN"]
+
+print(TOKEN)
 
 
 class Boss:
@@ -147,6 +154,9 @@ async def on_message(message):
     # メッセージ送信者がBotだった場合は無視する
     if message.author.bot:
         return
+
+    global manage_dict
+
     channel = message.channel
     author_display_name = message.author.display_name
 
@@ -165,8 +175,7 @@ async def on_message(message):
     
         if len(argument_list) == 1:        
             
-            with open(json_file,"r") as f:
-                manage_dict = json.load(f)
+
             output_channel = guild.get_channel(manage_dict[channel_id_str]["output_channel"])
             manage_dict[channel_id_str]["boss_supress_number"] = 0
 
@@ -189,8 +198,6 @@ async def on_message(message):
         #周回数およびボス番号を指定する，dictの初期化は行わない．
         if len(argument_list) == 3 and argument_list[1].isdecimal and argument_list[2].isdecimal:
 
-            with open(json_file,"r") as f:
-                manage_dict = json.load(f)
 
             output_channel = guild.get_channel(manage_dict[channel_id_str]["output_channel"])
             manage_dict[channel_id_str]["boss_supress_number"] = (int(argument_list[1])-1)*5 + int(argument_list[2])-1
@@ -216,8 +223,6 @@ async def on_message(message):
         print(datetime.now(JST),message.content)
         if len(argument_list) == 3:
             if argument_list[1].isdecimal and argument_list[2].isdecimal:
-                with open(json_file,"r") as f:
-                    manage_dict = json.load(f)
 
                 remain_hp = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["plan_remain_hp"]
                 if remain_hp == 0:
@@ -251,8 +256,7 @@ async def on_message(message):
 
         elif len(argument_list) == 4: 
             if argument_list[1].isdecimal and argument_list[2].isdecimal and argument_list[3] == "mochi":
-                with open(json_file,"r") as f:
-                    manage_dict = json.load(f)
+
                 #remain_hp = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["plan_remain_hp"]
 
                 default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
@@ -283,9 +287,7 @@ async def on_message(message):
         print(datetime.now(JST),message.content)
         if len(argument_list) == 1 :
             return 
-        if argument_list[1].isdecimal:
-            with open(json_file,"r") as f:
-                manage_dict = json.load(f)            
+        if argument_list[1].isdecimal:     
 
             member_list = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"].split("\t")
             if author_display_name in member_list:
@@ -326,8 +328,6 @@ async def on_message(message):
     if message.content.startswith("/totsu") or message.content.startswith(".totsu"):
         print(datetime.now(JST),message.content)
 
-        with open(json_file,"r") as f:
-            manage_dict = json.load(f)
         boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
     
         if len(argument_list) == 1:
@@ -405,8 +405,7 @@ async def on_message(message):
 
         if len(argument_list)==2 :
             argument_list[1] = argument_list[1].replace(",","")
-            with open(json_file,"r") as f:
-                manage_dict = json.load(f)       
+       
             totsu_list = manage_dict[channel_id_str]["reserve"]["totsu"].split("\t")
 
             #凸宣言してなければ無視
@@ -549,8 +548,6 @@ async def on_message(message):
         await bosyu_message.edit(content=new_message)
 
 
-        with open(json_file,"w") as f:
-            json.dump(manage_dict,f)
 
         notify_text = ""
         boss_next = str((int(boss_now)+1)%5)
@@ -572,8 +569,6 @@ async def on_message(message):
             argument_list[1] = argument_list[1].replace(",","")
 
             if argument_list[1].isdecimal:
-                with open(json_file,"r") as f:
-                    manage_dict = json.load(f)
 
                 manage_dict[channel_id_str]["reserve"]["remain_hp"] = int(argument_list[1])
                 boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
@@ -762,14 +757,11 @@ async def loop():
     now = datetime.now(JST).strftime('%H:%M')
     if now == '25:00': #クラバト期間中は朝5時に出すように書き換える
         guild = client.get_guild(guild_id)
+        global manage_dict
         #デフォルトで絵文字をリアクションに付けておく
         emojis = guild.emojis
         magic_emoji_list = [emoji for emoji in emojis if "magic1"==emoji.name or "magic2"==emoji.name or "magic3" == emoji.name]
         attack_emoji_list = [emoji for emoji in emojis if "attack1"==emoji.name or "attack2"==emoji.name or "attack3" == emoji.name] 
-
-
-        with open(json_file,"r") as f:
-            manage_dict = json.load(f)
 
         for clan_dict in clan_dicts:
             task_kill_text,remain_totsu_text  = make_morning_message(guild,clan_dict)

@@ -3,6 +3,7 @@
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
 
 
 
@@ -14,7 +15,6 @@ class GspreadHandler(object):
         self.json_file = 'pricone-cda894e1aa6a.json'
         self.scope = ['https://spreadsheets.google.com/feeds']
         self.gsfile = None
-        self.sheet_id = "1Pg3u-JxSYLPxEEgvt1rHU21TcNBfPW0gpZYFLKt31_M"
         self.get_gsfile()
 
 
@@ -22,7 +22,9 @@ class GspreadHandler(object):
         """ 読み書きするスプレッドシートのインスタンスを取得 """
         credentials = ServiceAccountCredentials.from_json_keyfile_name(self.json_file, self.scope)
         client = gspread.authorize(credentials)
-        self.gsfile = client.open_by_key(self.sheet_id)
+        with open("config.json") as f:
+            sheet_id = json.load(f)["SHEET_ID"]
+        self.gsfile = client.open_by_key(sheet_id)
 
 
     def dataset_fromSheet(self, read_sheet_name):
