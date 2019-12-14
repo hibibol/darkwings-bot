@@ -316,7 +316,10 @@ async def on_message(message):
                 if member_index < len(over_list)-1:
                     over_list.pop(member_index)
                 
-                default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
+                if manage_dict[channel_id_str]["boss_supress_number"] %5 == int(argument_list[1]) -1:
+                    default_hp = manage_dict[channel_id_str]["reserve"]["remain_hp"]
+                else:
+                    default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
 
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"] = list2tsv(damage_list)
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"] = list2tsv(member_list)
