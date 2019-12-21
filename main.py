@@ -308,6 +308,8 @@ async def on_message(message):
                 over_list = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["over"].split("\t")
                 damage_list = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"].split("\t")
                 ids_list = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["ids"].split("\t")
+                
+                manage_dict[channel_id_str]["reserve"]["totsu"] = manage_dict[channel_id_str]["reserve"]["totsu"].replace(f"{author_display_name}\t","") 
 
                 
                 member_list.pop(member_index)
