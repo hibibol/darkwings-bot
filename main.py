@@ -522,6 +522,7 @@ async def on_message(message):
             if i != 0:
                 element_list = line.split("\t")
                 if author_display_name == element_list[1]:
+                    
                     if len(argument_list) == 1:
                         if len(element_list[0]) == 1:
                             message_content = f"{message.author.mention} 持ち越した場合には `/la [持ち越し時間]`を入力してください"
@@ -532,11 +533,17 @@ async def on_message(message):
                         if remain_totsu != 0:
                             remain_totsu -=1
                             new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}\t{element_list[2]}"
+   
                     else:
-                        #LAで持ち越した場合
-                        boss_name = boss_list_n[int(boss_now)].name
-                        remain_totsu = element_list[0]
-                        new_lines[i] = f"{remain_totsu}(持ち越し:{boss_name} {argument_list[1]})\t{author_display_name}\t{element_list[2]}"
+                        if len(element_list[0]) == 1:
+                            #LAで持ち越した場合
+                            boss_name = boss_list_ns[int(boss_now)].name
+                            remain_totsu = element_list[0]
+                            new_lines[i] = f"{remain_totsu}(持ち越し:{boss_name} {argument_list[1]})\t{author_display_name}\t{element_list[2]}"
+                        else:
+                            #持ち越しでLAを行った場合 
+                            message_content = f"{message.author.mention} 持ち越しの持ち越しは出来ません"
+                            return await message.channel.send(content=message_content)
 
         new_remain_totsu_message = ""
         for line in new_lines:
