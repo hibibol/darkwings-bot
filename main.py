@@ -102,10 +102,10 @@ def calc_default_hp(manage_dict,boss_arg_number,channel_id_str):
     diff_number = boss_arg_number-1 - boss_supress_number%5
     if diff_number <0:
         diff_number +=5
-    if boss_supress_number + diff_number < 49:
-        default_hp = boss_list_n[boss_arg_number-1].hp
+    if boss_supress_number + diff_number <= 49:
+        default_hp = boss_list_n[(boss_arg_number-1)%5].hp
     else:
-        default_hp = boss_list_vh[boss_arg_number-1].hp
+        default_hp = boss_list_vh[(boss_arg_number-1)%5].hp
     return default_hp
     
 
@@ -217,7 +217,7 @@ async def on_message(message):
             #dictの初期化
             for i in range(5):
                 default_hp = calc_default_hp(manage_dict,int(argument_list[2])+i,channel_id_str)
-                manage_dict[channel_id_str]["reserve"][str(i)] = initialize_reserve(manage_dict[channel_id_str]["reserve"][str(i)],default_hp)
+                manage_dict[channel_id_str]["reserve"][str((int(argument_list[2])+i-1)%5)] = initialize_reserve(manage_dict[channel_id_str]["reserve"][str((int(argument_list[2])+i-1)%5)],default_hp)
             manage_dict[channel_id_str]["reserve"]["remain_hp"] = calc_default_hp(manage_dict,int(argument_list[2]),channel_id_str)
             manage_dict[channel_id_str]["reserve"]["totsu"] = ""
 
@@ -537,7 +537,7 @@ async def on_message(message):
                     else:
                         if len(element_list[0]) == 1:
                             #LAで持ち越した場合
-                            boss_name = boss_list_ns[int(boss_now)].name
+                            boss_name = boss_list_n[int(boss_now)].name
                             remain_totsu = element_list[0]
                             new_lines[i] = f"{remain_totsu}(持ち越し:{boss_name} {argument_list[1]})\t{author_display_name}\t{element_list[2]}"
                         else:
