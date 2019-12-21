@@ -46,16 +46,16 @@ def create_bosyu_message(boss_supress_number,reserve_dict):
 
 #    if boss_supress_number < 48 :
     text += "**" + boss_list_n[boss_supress_number%5].name +"**\n"\
-            +"残HP:"+'{:,}'.format(reserve_dict["remain_hp"]) +"\n"
+            +"残HP:"+'{:,}'.format(reserve_dict["remain_hp"]) +"万\n"
     
-    text +="凸終了後予定残HP:"+'{:,}'.format(reserve_dict[str(boss_supress_number%5)]["plan_remain_hp"])+"\n"\
+    text +="凸終了後予定残HP:"+'{:,}'.format(reserve_dict[str(boss_supress_number%5)]["plan_remain_hp"])+"万\n"\
         +"[凸予定者]" +"\n"
     totsus = reserve_dict["totsu"].split("\t")
     text += create_reserve_message_for_each_boss(reserve_dict[str(boss_supress_number%5)],totsu_list=totsus)
     text += "\n[凸予約状況]"
     for i in range(1,5):
         text+= "\n"+boss_list_vh[(boss_supress_number+i)%5].name + "\n"\
-            +"凸終了後予定残HP:"+'{:,}'.format(reserve_dict[str((boss_supress_number+i)%5)]["plan_remain_hp"])+"\n"
+            +"凸終了後予定残HP:"+'{:,}'.format(reserve_dict[str((boss_supress_number+i)%5)]["plan_remain_hp"])+"万\n"
         text += create_reserve_message_for_each_boss(reserve_dict[str((boss_supress_number+i)%5)])
 
     return text
