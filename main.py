@@ -237,12 +237,18 @@ async def on_message(message):
         if len(argument_list) == 3:
             if argument_list[1].isdecimal and argument_list[2].isdecimal:
 
+                if int(argument_list[1]) > 5:
+                    return await message.channel.send(f"{message.author.mention} 入力が不正です．ボス番号(`{argument_list[1]}`) は1から5までの整数である必要があります")
+
                 remain_hp = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["plan_remain_hp"]
                 if remain_hp == 0:
                     if int(argument_list[1])-1 == manage_dict[channel_id_str]["boss_supress_number"]%5:
                         return await message.channel.send(f"{message.author.mention} 既に予約が埋まっています。予約者を無視する場合には `/totsu` コマンドを用いて下さい。")
                     else:
                         return await message.channel.send(f"{message.author.mention} 既に予約が埋まっています。")
+
+                if int(argument_list[2]) >= 10000:
+                    return await message.channel.send(f"{message.author.mention} ダメージ(`{argument_list[2]}`)は万単位で送信してください")
 
                 default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
 
@@ -266,9 +272,14 @@ async def on_message(message):
 
                 await message.add_reaction(ok_hand)
 
+            else:
+                return await message.channel.send(f"{message.author.mention} 入力が不正です． ボス番号(`{argument_list[1]}`) 予定ダメージ(`{argument_list[2]}`)")
 
         elif len(argument_list) == 4: 
             if argument_list[1].isdecimal and argument_list[2].isdecimal and argument_list[3] == "mochi":
+
+                if int(argument_list[2]) >= 10000:
+                    return await message.channel.send(f"{message.author.mention} ダメージ(`{argument_list[2]}`)は万単位で送信してください")
 
                 #remain_hp = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["plan_remain_hp"]
 
@@ -294,13 +305,17 @@ async def on_message(message):
                 with open(json_file,"w") as f:
                     json.dump(manage_dict,f)
                 await message.add_reaction(ok_hand)
+        else:
+            return await message.channel.send(f"{message.author.mention} 入力が不正です．`.reserve [ボス番号] [予定ダメージ]` を入力してください．\n持ち越しで凸予約する場合は`.reserve [ボス番号] [予定ダメージ] mochi` を入力してください．")
 
 
     if message.content.startswith("/cancel") or message.content.startswith(".cancel"):
         print(datetime.now(JST),author_display_name,message.guild.name,message.content,flush=True)
         if len(argument_list) == 1 :
             return await message.channel.send(f"{message.author.mention} ボス番号を入力してください")
-        if argument_list[1].isdecimal:     
+        if argument_list[1].isdecimal:
+            if int(argument_list[1]) > 5:
+                return await message.channel.send(f"{message.author.mention} ボス番号`{argument_list[1]}`が不正です．1から5までの数字を送信してください")
 
             member_list = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"].split("\t")
             if author_display_name in member_list:
@@ -341,7 +356,8 @@ async def on_message(message):
                 with open(json_file,"w") as f:
                     json.dump(manage_dict,f)
                 await message.add_reaction(ok_hand)
-
+        else:
+            return await message.channel.send(f"{message.author.mention} ボス番号`{argument_list[1]}`が不正です．1から5までの数字を送信してください")
 
     if message.content.startswith("/totsu") or message.content.startswith(".totsu"):
         print(datetime.now(JST),author_display_name,message.guild.name,message.content,flush=True)
@@ -367,7 +383,13 @@ async def on_message(message):
 
         elif len(argument_list) == 2:
             if argument_list[1].isdecimal:
+                if author_display_name in manage_dict[channel_id_str]["reserve"][boss_now]["members"].split("\t"):
+                    return await message.channel.send(f"{message.author.mention} 既に予約済みです．凸前宣言は`.totsu` を送信してください．\n持ち越しを消化する場合には`.totsu [予定ダメージ] mochi` を送信してください.")
 
+                if int(argument_list[1]) >= 10000:
+                    return await message.channel.send(f"{message.author.mention} ダメージ(`{argument_list[1]}`)は万単位で送信してください")
+
+ 
                 default_hp = manage_dict[channel_id_str]["reserve"]["remain_hp"]
                 manage_dict[channel_id_str]["reserve"][boss_now]["members"] += f"{author_display_name}\t"
                 manage_dict[channel_id_str]["reserve"][boss_now]["damages"] += f"{str(argument_list[1])}\t"
@@ -388,6 +410,8 @@ async def on_message(message):
                 with open(json_file,"w") as f:
                     json.dump(manage_dict,f)
                 await message.add_reaction(ok_hand)
+            else:
+                return await message.channel.send(f"{message.author.mention} 入力が不正です．予定ダメージ(`{argument_list[1]}`)")
 
 
         elif len(argument_list) == 3 and argument_list[1].isdecimal:
@@ -416,6 +440,8 @@ async def on_message(message):
                 with open(json_file,"w") as f:
                     json.dump(manage_dict,f)
                 await message.add_reaction(ok_hand)
+        else:
+            return await message.channel.send(f"{message.author.mention} 入力が不正です．予定ダメージ(`{argument_list[1]}`)")
 
 
     if message.content.startswith("/fin") or message.content.startswith(".fin"):
@@ -423,15 +449,23 @@ async def on_message(message):
 
         if len(argument_list)==2 :
             argument_list[1] = argument_list[1].replace(",","")
+            if not argument_list[1].isdecimal():
+                return await message.channel.send(f"{message.author.mention} 入力が不正です．ダメージ(`{argument_list[1]}`)")
+
        
             totsu_list = manage_dict[channel_id_str]["reserve"]["totsu"].split("\t")
+            boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
 
+            member_list = manage_dict[channel_id_str]["reserve"][boss_now]["members"].split("\t")       
+
+            if not author_display_name in member_list:            
+                text = f"{message.author.mention} 予約及び凸宣言がされていません"
+                return await message.channel.send(content = text)
             #凸宣言してなければ無視
             if not author_display_name in totsu_list:
                 text = f"{message.author.mention} 先に凸宣言を行ってください"
                 return await message.channel.send(content = text)
 
-            boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
 
             if argument_list[1].isdecimal:
                 remain_hp = manage_dict[channel_id_str]["reserve"]["remain_hp"]
@@ -495,21 +529,25 @@ async def on_message(message):
 
                 #処理完了の挨拶
                 await message.add_reaction(ok_hand)
+        else:
+            return message.channel.send(f"{message.author.mention} 入力が不正です．`.fin [与えたダメージ]` を送信してください．")
 
 
 
     #LA時用のコマンド
     if message.content.startswith("/la") or message.content.startswith(".la"):
         print(datetime.now(JST),author_display_name,message.guild.name,message.content,flush=True)
-        with open(json_file,"r") as f:
-            manage_dict = json.load(f)       
         totsu_list = manage_dict[channel_id_str]["reserve"]["totsu"].split("\t")
-        #何らかの理由により体力調整をする必要が出た場合は別のコマンドにしよう
-        #if argument_list[1].isdecimal and argument_list[2] == "admin":
+        boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
 
+        member_list = manage_dict[channel_id_str]["reserve"][boss_now]["members"].split("\t")
+
+        if not author_display_name in member_list:            
+            text = f"{message.author.mention} 予約及び凸宣言がされていません"
+            return await message.channel.send(content = text)
         #凸宣言してなければ無視
         if not author_display_name in totsu_list:
-            text = f"{message.author.mention} 先の凸宣言を行ってください"
+            text = f"{message.author.mention} 先に凸宣言を行ってください"
             return await message.channel.send(content = text)
         boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
     
@@ -594,6 +632,10 @@ async def on_message(message):
             argument_list[1] = argument_list[1].replace(",","")
 
             if argument_list[1].isdecimal:
+
+
+                if int(argument_list[1]) >= 10000:
+                    return await message.channel.send(f"{message.author.mention} ボス残HP(`{argument_list[1]}`)は万単位で送信してください")        
 
                 manage_dict[channel_id_str]["reserve"]["remain_hp"] = int(argument_list[1])
                 boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
