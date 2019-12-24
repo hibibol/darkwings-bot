@@ -35,8 +35,8 @@ class Boss:
         self.hp = hp
         self.name = name
 
-boss_list_n= [Boss("ゴブリングレート",600),Boss("ライライ",800),Boss("ニードルクリーパー",1000),Boss("サイクロプス",1200),Boss("レサトパルト",1500)]
-boss_list_vh= [Boss("ゴブリングレート",700),Boss("ライライ",900),Boss("ニードルクリーパー",1200),Boss("サイクロプス",1400),Boss("レサトパルト",1700)]
+boss_list_n= [Boss("ゴブリングレート",600),Boss("ライライ",800),Boss("ムシュフシュ",1000),Boss("マスター・センリ",1200),Boss("アルゲティ",1200)]
+boss_list_vh= [Boss("ゴブリングレート",700),Boss("ライライ",900),Boss("ムシュフシュ",1200),Boss("マスター・センリ",1400),Boss("アルゲティ",1400)]
 
 
 def create_bosyu_message(boss_supress_number,reserve_dict):
@@ -323,8 +323,8 @@ async def on_message(message):
                 else:
                     default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
 
-                manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"] = list2tsv(damage_list)
-                manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"] = list2tsv(member_list)
+                manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"] = list2tsv(member_list)
+                manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"] = list2tsv(damage_list)
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["ids"] = list2tsv(ids_list)
 
 
