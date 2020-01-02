@@ -232,7 +232,7 @@ class Music(commands.Cog):
         await self.cleanup(ctx.guild)
     
     @commands.command(name="play")
-    async def play(self,ctx,number:int):
+    async def play(self,ctx,number=1):
 
         vc = ctx.voice_client
         if not vc:
@@ -274,7 +274,7 @@ async def on_ready():
     print('------')
 
 with open("config.json","r") as f:
-    TOKEN = json.load(f)["DISCORD_TOKEN"]
+    TOKEN = json.load(f)["DISCORD_MUSIC_TOKEN"]
 
 bot.add_cog(Music(bot))
 bot.run(TOKEN)

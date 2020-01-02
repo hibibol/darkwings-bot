@@ -10,10 +10,13 @@ from route import RouteChecker
 from route import GspreadHandler
 from const import *
 import json
-
+import numpy
 #テロに必要
 import random
 import glob
+
+
+unchi = "💩"
 
 
 # 接続に必要なオブジェクトを生成
@@ -29,14 +32,15 @@ with open("config.json","r") as f:
 
 print(TOKEN)
 
+#manage_dict["count"] =0
 
 class Boss:
     def __init__(self,name,hp):
         self.hp = hp
         self.name = name
 
-boss_list_n= [Boss("ゴブリングレート",600),Boss("ライライ",800),Boss("ムシュフシュ",1000),Boss("マスター・センリ",1200),Boss("アルゲティ",1200)]
-boss_list_vh= [Boss("ゴブリングレート",700),Boss("ライライ",900),Boss("ムシュフシュ",1200),Boss("マスター・センリ",1400),Boss("アルゲティ",1400)]
+boss_list_n= [Boss("ゴブリングレート",600),Boss("ライライ",800),Boss("ムシュフシュ",1000),Boss("マスター・センリ",1200),Boss("アルゲティ",1500)]
+boss_list_vh= [Boss("ゴブリングレート",700),Boss("ライライ",900),Boss("ムシュフシュ",1200),Boss("マスター・センリ",1400),Boss("アルゲティ",1700)]
 
 
 def create_bosyu_message(boss_supress_number,reserve_dict):
@@ -69,7 +73,7 @@ def create_reserve_message_for_each_boss(reserve_each_dict,totsu_list=False):
     members_number = len(member_list) -1
     text = ""
     for i in range(members_number):
-        line = "\t" + member_list[i] + " " + str(damage_list[i])
+        line = "\t" + member_list[i] + " " + str(damage_list[i]) + "万"
         if len(over_list)-1 > i:
             if member_list[i] == over_list[i]:
                 line += " 持ち越し"
@@ -250,7 +254,10 @@ async def on_message(message):
                 if int(argument_list[2]) >= 10000:
                     return await message.channel.send(f"{message.author.mention} ダメージ(`{argument_list[2]}`)は万単位で送信してください")
 
-                default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
+                if manage_dict[channel_id_str]["boss_supress_number"] %5 == int(argument_list[1]) -1:
+                    default_hp = manage_dict[channel_id_str]["reserve"]["remain_hp"]
+                else:
+                    default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
 
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"] += f"{author_display_name}\t"
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"] += f"{str(argument_list[2])}\t"
@@ -283,7 +290,10 @@ async def on_message(message):
 
                 #remain_hp = manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["plan_remain_hp"]
 
-                default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
+                if manage_dict[channel_id_str]["boss_supress_number"] %5 == int(argument_list[1]) -1:
+                    default_hp = manage_dict[channel_id_str]["reserve"]["remain_hp"]
+                else:
+                    default_hp = calc_default_hp(manage_dict, int(argument_list[1]),channel_id_str)
 
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"] = f"{author_display_name}\t"+manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["members"]
                 manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"] = f"{str(argument_list[2])}\t"+manage_dict[channel_id_str]["reserve"][str(int(argument_list[1])-1)]["damages"]
@@ -452,6 +462,8 @@ async def on_message(message):
             if not argument_list[1].isdecimal():
                 return await message.channel.send(f"{message.author.mention} 入力が不正です．ダメージ(`{argument_list[1]}`)")
 
+            if int(argument_list[1]) >= 10000:
+                return await message.channel.send(f"{message.author.mention} ダメージ(`{argument_list[1]}`)は万単位で送信してください")
        
             totsu_list = manage_dict[channel_id_str]["reserve"]["totsu"].split("\t")
             boss_now = str(manage_dict[channel_id_str]["boss_supress_number"]%5)
@@ -519,7 +531,11 @@ async def on_message(message):
                             remain_totsu = int(element_list[0][0])
                             if remain_totsu != 0:
                                 remain_totsu -=1
-                                new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}\t{element_list[2]}"
+                                if len(element_list) == 3:
+                                    new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}\t{element_list[2]}"
+                                else:
+                                    new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}"
+
 
                 new_remain_totsu_message = ""
                 for line in new_lines:
@@ -572,14 +588,20 @@ async def on_message(message):
                         remain_totsu = int(element_list[0][0])
                         if remain_totsu != 0:
                             remain_totsu -=1
-                            new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}\t{element_list[2]}"
+                            if len(element_list) == 3:
+                                new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}\t{element_list[2]}"
+                            else:
+                                new_lines[i] = f"{str(remain_totsu)}\t{author_display_name}"
    
                     else:
                         if len(element_list[0]) == 1:
                             #LAで持ち越した場合
                             boss_name = boss_list_n[int(boss_now)].name
                             remain_totsu = element_list[0]
-                            new_lines[i] = f"{remain_totsu}(持ち越し:{boss_name} {argument_list[1]})\t{author_display_name}\t{element_list[2]}"
+                            if len(element_list) == 3:
+                                new_lines[i] = f"{remain_totsu}(持ち越し:{boss_name} {argument_list[1]})\t{author_display_name}\t{element_list[2]}"
+                            else:
+                                new_lines[i] = f"{remain_totsu}(持ち越し:{boss_name} {argument_list[1]})\t{author_display_name}"                     
                         else:
                             #持ち越しでLAを行った場合 
                             message_content = f"{message.author.mention} 持ち越しの持ち越しは出来ません"
@@ -678,6 +700,27 @@ async def on_message(message):
             await message.channel.send(content=create_route_message(route))
             print(i)
 
+    #ユニ爺に0.7%の確率でうんこつける
+#    if message.author.id == 435960125245620235:#ユニ爺うんち
+ #       manage_dict["count"] += 1
+#
+ #       if manage_dict["count"] == 300:
+  #          content = f"{message.author.mention}おめでとうございます．\nポイントが溜まりました!PUキャラが手に入りますよ!"
+   #         await message.channel.send(content = content,file=discord.File("./figs/unchi_jii.jpg"))
+    #        await message.add_reaction(unchi)
+     #       manage_dict["count"] = 0
+      #      
+       # elif numpy.random.choice([False,True],p=[0.95,0.05]):
+        #    serifu = f"{message.author.mention} おめでとうございます!"
+         #   await message.channel.send(content = serifu,file=discord.File("./figs/karin.jpg"))
+          #  await message.add_reaction(unchi)
+
+       # with open(json_file,"w") as f:
+        #    json.dump(manage_dict,f)        
+        
+
+        
+
 
 
 
@@ -713,7 +756,11 @@ async def on_raw_reaction_add(payload):
 
             for i,line in enumerate(lines):
                 if member_display_name in line:
-                    new_lines[i] += str(emoji)
+                    if len(new_lines[i].split("\t")) == 3:
+                        new_lines[i] += str(emoji)
+                    else:
+                        new_lines[i] += "\t"+str(emoji)
+
             
             new_text = ""
 
@@ -822,7 +869,7 @@ async def on_raw_reaction_remove(payload):
 async def loop():
     # 現在の時刻
     now = datetime.now(JST).strftime('%H:%M')
-    if now == '05:00': #クラバト期間中は朝5時に出すように書き換える
+    if now == '25:00': #クラバト期間中は朝5時に出すように書き換える
         guild = client.get_guild(guild_id)
         global manage_dict
         #デフォルトで絵文字をリアクションに付けておく
