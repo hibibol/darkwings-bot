@@ -39,8 +39,8 @@ class Boss:
         self.hp = hp
         self.name = name
 
-boss_list_n= [Boss("ゴブリングレート",600),Boss("ライライ",800),Boss("ムシュフシュ",1000),Boss("マスター・センリ",1200),Boss("アルゲティ",1500)]
-boss_list_vh= [Boss("ゴブリングレート",700),Boss("ライライ",900),Boss("ムシュフシュ",1200),Boss("マスター・センリ",1400),Boss("アルゲティ",1700)]
+boss_list_n= [Boss("ワイバーン",600),Boss("ワイルドグリフォン",800),Boss("ライデン",1000),Boss("ネプテリオン",1200),Boss("アクアリオス",1500)]
+boss_list_vh= [Boss("ワイバーン",700),Boss("ワイルドグリフォン",900),Boss("ライデン",1300),Boss("ネプテリオン",1500),Boss("アクアリオス",2000)]
 
 
 def create_bosyu_message(boss_supress_number,reserve_dict):
